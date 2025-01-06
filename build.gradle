@@ -1,0 +1,47 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'ma.inwi.innov'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Use Hibernate 6.x, which supports Jakarta Persistence
+	implementation 'org.hibernate:hibernate-core:6.2.1.Final'
+
+	// You can remove the hibernate-tools dependency if not used explicitly
+	// implementation 'org.hibernate:hibernate-tools:5.6.9.Final'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Spring Boot starter for JPA, will bring in the necessary JPA dependencies
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// Database drivers
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'org.postgresql:postgresql:42.5.0'
+
+	// Testing dependencies
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client
+	implementation 'org.keycloak:keycloak-admin-client:26.0.3'
+
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+	implementation 'org.apache.commons:commons-lang3:3.17.0'
+
+}

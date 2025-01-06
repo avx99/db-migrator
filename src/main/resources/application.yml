@@ -1,0 +1,73 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: migration-app
+  output:
+    ansi:
+      enabled: ALWAYS
+  datasource:
+    postgres:
+      url: jdbc:postgresql://192.168.49.2:30037/migration
+      username: ${INNOV_BACKEND_DB_USERNAME:migration}
+      password: ${INNOV_BACKEND_DB_PASSWORD:migration}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximum-pool-size: 20
+    mysql:
+      url: ${OLD_INNOV_BACKEND_DB_URL:jdbc:mysql://192.168.49.2:30036/migration?allowPublicKeyRetrieval=true&useSSL=false&zeroDateTimeBehavior=convertToNull}
+      username: ${OLD_INNOV_BACKEND_DB_USERNAME:root}
+      password: ${OLD_INNOV_BACKEND_DB_PASSWORD:root}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        maximum-pool-size: 20
+  jpa:
+    show-sql: true
+---
+
+keycloak:
+  realm: innov-external
+  auth-server-url: ${IDP_HOST:http://keycloak-innov.xelops.lan/}
+  resource: ${CLIENT_ID_KECK:innov-service-api}
+  credentials:
+    secret: ${CLIENT_KECK_SECRET:IPHJSLYXzEGjFxaZSnNpC8YI4VChSqOm}
+  use-resource-role-mappings: true
+  service-account-enabled: true
+
+management:
+  tracing:
+    enabled: true
+
+
+logging:
+  level:
+    root: info
+    org.springframework.web: DEBUG
+    org.springframework.boot.context.properties: DEBUG
+
+migration:
+  utils:
+    static-files-root: ${MIGRATION_STATIC_FILES_ROOT:/v1/static/data}
+
+---
+feign:
+  clients:
+    cms: ${INNOV_CMS_URL:http://localhost:1337}
+    recaptcha:
+      base-url: ${INNOV_CAPTCHA_VALIDATOR_API_URL:https://recaptchaenterprise.googleapis.com/v1/projects}
+      project-id: ${INNOV_CAPTCHA_VALIDATOR_API_PROJECT_ID:my-project-11518-1733404188679}
+      api-key: ${INNOV_CAPTCHA_VALIDATOR_API_KEY:AIzaSyAKNdxeYOWmHyQ8pI2EtrsGVVK1-8NLs9A}
+      site-key: ${INNOV_CAPTCHA_VALIDATOR_SITE_KEY:6LdvOpMqAAAAAA0MybL2mY6U4tMv_BrE43kXYaj9}
+
+
+keycloak:
+  realm: innov
+  auth-server-url: ${MIGRATION_IDP_HOST:http://192.168.49.2:30859}
+  resource: ${MIGRATION_CLIENT_ID_KECK:innov}
+  credentials:
+    secret: ${MIGRATION_CLIENT_KECK_SECRET:Rh6uAQs1sORLn59cKg9u7XwljlZJbXOw}
+    username: ${MIGRATION_IDP_USERNAME:oussama.abouzid}
+    password: ${MIGRATION_IDP_PASSWORD:Pa123456}
+  use-resource-role-mappings: true
+  service-account-enabled: true
