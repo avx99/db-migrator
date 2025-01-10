@@ -1,93 +1,133 @@
-# db-migration
 
+# Migration App
 
+## Overview
 
-## Getting started
+The Migration App is a Spring Boot application designed to facilitate the migration of data from a MySQL database to a PostgreSQL database. The application leverages Spring Batch for batch processing, Feign for service communication, and integrates with Keycloak for authentication.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+This app uses a Gradle build system, and it is configurable using the `application.yaml` file, which contains details about the databases, Keycloak integration, and other system parameters.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Prerequisites
 
-## Add your files
+- JDK 17+
+- Gradle
+- PostgreSQL and MySQL databases
+- Keycloak server for authentication
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Configuration
 
+The application configuration is stored in the `application.yaml` file, where key parameters for the databases, Keycloak authentication, and migration utility settings are defined.
+
+### Server Configuration
+
+```yaml
+server:
+  port: 9000
 ```
-cd existing_repo
-git remote add origin https://git.neoxia-maroc.net/inwi-digital/openinnov-refonte/db-migration.git
-git branch -M main
-git push -uf origin main
+
+The app runs on port `9000`.
+
+### Datasource Configuration
+
+Two databases are configured: PostgreSQL and MySQL. The credentials are configurable through environment variables.
+
+#### PostgreSQL
+
+```yaml
+spring:
+  datasource:
+    postgres:
+      url: jdbc:postgresql://192.168.49.2:30037/migration
+      username: ${INNOV_BACKEND_DB_USERNAME:migration}
+      password: ${INNOV_BACKEND_DB_PASSWORD:migration}
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximum-pool-size: 20
 ```
 
-## Integrate with your tools
+#### MySQL
 
-- [ ] [Set up project integrations](https://git.neoxia-maroc.net/inwi-digital/openinnov-refonte/db-migration/-/settings/integrations)
+```yaml
+spring:
+  datasource:
+    mysql:
+      url: ${OLD_INNOV_BACKEND_DB_URL:jdbc:mysql://192.168.49.2:30036/migration?allowPublicKeyRetrieval=true&useSSL=false&zeroDateTimeBehavior=convertToNull}
+      username: ${OLD_INNOV_BACKEND_DB_USERNAME:root}
+      password: ${OLD_INNOV_BACKEND_DB_PASSWORD:root}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        maximum-pool-size: 20
+```
 
-## Collaborate with your team
+### Keycloak Configuration
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+The application uses Keycloak for authentication. Both Keycloak configurations (for access to the migration service and the backend) are defined.
 
-## Test and Deploy
+```yaml
+keycloak:
+  realm: innov-external
+  auth-server-url: ${IDP_HOST:http://keycloak-innov.xelops.lan/}
+  resource: ${CLIENT_ID_KECK:innov-service-api}
+  credentials:
+    secret: ${CLIENT_KECK_SECRET:IPHJSLYXzEGjFxaZSnNpC8YI4VChSqOm}
+```
 
-Use the built-in continuous integration in GitLab.
+The credentials for accessing Keycloak, including realm and client details, are set in the YAML.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### Migration Utility Configuration
 
-***
+This section configures the migration utility, such as the location for static files, batch size, and migration versions.
 
-# Editing this README
+```yaml
+migration:
+  utils:
+    static-files-root: ${MIGRATION_STATIC_FILES_ROOT:/v1/static/data/}
+    batch-size: 5
+    enabled: true
+    versions:
+      - "1.0.0"
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Feign Clients Configuration
 
-## Suggestions for a good README
+Feign is used for communication with external services. The client URLs are configurable via environment variables.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```yaml
+feign:
+  clients:
+    innov:
+      cm: ${MIGRATION_INNOV_CMS_URL:http://localhost:1337}
+      service: ${MIGRATION_INNOV_CMS_URL:http://localhost:8090}
+```
 
-## Name
-Choose a self-explaining name for your project.
+## Running the Application
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+To run the application, use the following command:
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+./gradlew bootRun
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+This will start the application on port `9000` by default. Ensure the environment variables are set for database connections and Keycloak credentials.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## Architecture
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+The Migration App follows a microservices-based architecture with several key components:
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+- **Spring Boot Application**: The core of the application, responsible for handling migration tasks and batch processing.
+- **PostgreSQL & MySQL Databases**: The source (MySQL) and destination (PostgreSQL) databases for the migration process.
+- **Keycloak**: For user authentication and service communication.
+- **Feign Clients**: For external service communication (e.g., CMS).
+- **Spring Batch**: For handling batch processing during migration.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## Diagrams
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Below is a basic architecture diagram for the Migration App:
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+1. **Data Flow**: MySQL -> Migration App -> PostgreSQL
+2. **User Flow**: Keycloak <-> Migration App
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Conclusion
 
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+This application provides a seamless solution for migrating data between different database systems, with secure access and batch processing capabilities. It can be customized further by adjusting the configuration in the `application.yaml`.

@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "event_media")
+@Table(schema = "innov", name = "event_media")
 public class EventMedia extends AuditDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

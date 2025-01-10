@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "challenge")
+@Table(schema = "innov", name = "challenge")
 public class Challenge extends AuditDetails {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

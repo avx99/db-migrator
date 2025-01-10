@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "event_winner")
+@Table(schema = "innov", name = "event_winner")
 public class EventWinner {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "project")
+@Table(schema = "innov", name = "project")
 public class Project extends AuditDetails {
 
     @Id

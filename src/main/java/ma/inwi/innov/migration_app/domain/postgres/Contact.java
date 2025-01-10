@@ -16,7 +16,7 @@ import ma.inwi.innov.migration_app.enumeration.mail.SenderType;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "contact")
+@Table(schema = "innov", name = "contact")
 public class Contact extends AuditDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -43,31 +43,40 @@ management:
 logging:
   level:
     root: info
-    org.springframework.web: DEBUG
-    org.springframework.boot.context.properties: DEBUG
+    org:
+      springframework:
+        web: DEBUG
+        boot.context.properties: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
 
 migration:
   utils:
-    static-files-root: ${MIGRATION_STATIC_FILES_ROOT:/v1/static/data}
+    static-files-root: ${MIGRATION_STATIC_FILES_ROOT:/v1/static/data/}
+    batch-size: 5
+    enabled: true
+    versions:
+      - "1.0.0"
 
 ---
 feign:
   clients:
-    cms: ${INNOV_CMS_URL:http://localhost:1337}
-    recaptcha:
-      base-url: ${INNOV_CAPTCHA_VALIDATOR_API_URL:https://recaptchaenterprise.googleapis.com/v1/projects}
-      project-id: ${INNOV_CAPTCHA_VALIDATOR_API_PROJECT_ID:my-project-11518-1733404188679}
-      api-key: ${INNOV_CAPTCHA_VALIDATOR_API_KEY:AIzaSyAKNdxeYOWmHyQ8pI2EtrsGVVK1-8NLs9A}
-      site-key: ${INNOV_CAPTCHA_VALIDATOR_SITE_KEY:6LdvOpMqAAAAAA0MybL2mY6U4tMv_BrE43kXYaj9}
+    innov:
+      cm  s: ${MIGRATION_INNOV_CMS_URL:http://localhost:1337}
+      service: ${MIGRATION_INNOV_CMS_URL:http://localhost:8090}
 
 
 keycloak:
-  realm: innov
+  realm: master
   auth-server-url: ${MIGRATION_IDP_HOST:http://192.168.49.2:30859}
   resource: ${MIGRATION_CLIENT_ID_KECK:innov}
   credentials:
-    secret: ${MIGRATION_CLIENT_KECK_SECRET:Rh6uAQs1sORLn59cKg9u7XwljlZJbXOw}
-    username: ${MIGRATION_IDP_USERNAME:oussama.abouzid}
-    password: ${MIGRATION_IDP_PASSWORD:Pa123456}
+    secret: ${MIGRATION_CLIENT_KECK_SECRET:HvnDX2m4wn6VNjbDnC3iyGMqfKYZm7la}
+    username: ${MIGRATION_IDP_USERNAME:admin}
+    password: ${MIGRATION_IDP_PASSWORD:admin}
   use-resource-role-mappings: true
   service-account-enabled: true

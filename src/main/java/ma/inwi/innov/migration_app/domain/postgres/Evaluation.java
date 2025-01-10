@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "evaluation")
+@Table(schema = "innov", name = "evaluation")
 public class Evaluation extends AuditDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

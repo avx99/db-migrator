@@ -15,7 +15,7 @@ import ma.inwi.innov.migration_app.enumeration.documents.DocumentType;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "innov_document")
+@Table(schema = "innov", name = "innov_document")
 public class Document extends AuditDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

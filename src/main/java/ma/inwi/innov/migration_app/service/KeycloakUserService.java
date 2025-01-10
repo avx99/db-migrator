@@ -14,6 +14,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service class for managing Keycloak users.
+ * <p>
+ * This service provides methods to create users in Keycloak, set user passwords,
+ * and retrieve access tokens. It interacts with Keycloak's Admin REST API to manage users
+ * and their credentials.
+ * </p>
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +32,18 @@ public class KeycloakUserService {
     @Lazy
     private final Keycloak keycloak;
 
+    /**
+     * Creates a new user in Keycloak.
+     * <p>
+     * This method maps the provided {@link AccountDto} to a {@link UserRepresentation},
+     * and sends a request to Keycloak to create the user. If the user is successfully created,
+     * it returns the created user's ID. If creation fails, an error message is logged.
+     * </p>
+     *
+     * @param account The account details for the user to be created.
+     * @param isActive Whether the user should be active.
+     * @return The ID of the newly created user.
+     */
     public String createUser(AccountDto account, Boolean isActive) {
         log.info("Start Service migrate user to keycloak");
 
@@ -40,13 +60,28 @@ public class KeycloakUserService {
         return userId;
     }
 
-
+    /**
+     * Extracts the user ID from the location URL in the Keycloak response.
+     *
+     * @param response The response from the Keycloak server.
+     * @return The user ID.
+     */
     private String extractUserId(Response response) {
         var location = response.getLocation().getPath();
         return location.substring(location.lastIndexOf('/') + 1);
     }
 
-
+    /**
+     * Maps the account data to a Keycloak {@link UserRepresentation}.
+     * <p>
+     * This method creates a {@link UserRepresentation} object that contains the user data,
+     * such as first name, last name, email, username, and credentials.
+     * </p>
+     *
+     * @param account The account data.
+     * @param isActive Whether the user is active.
+     * @return The Keycloak {@link UserRepresentation}.
+     */
     private UserRepresentation mapToUserRepresentation(AccountDto account, Boolean isActive) {
         var credential = new CredentialRepresentation();
         credential.setTemporary(false);
@@ -70,15 +105,23 @@ public class KeycloakUserService {
         return email.split("@")[0];
     }
 
-    private void setPasswordForUser(String userId, String password) {
-        var credential = new CredentialRepresentation();
-        credential.setTemporary(false);
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(password);
-        keycloak.realm(keycloakProperties.getRealm())
-                .users()
-                .get(userId)
-                .resetPassword(credential);
-    }
 
+    /**
+     * Retrieves the current access token for the Keycloak client.
+     * <p>
+     * This method uses Keycloak's token manager to get the access token required
+     * for making requests to protected endpoints.
+     * </p>
+     *
+     * @return The access token.
+     * @throws RuntimeException If there is an error while retrieving the access token.
+     */
+    public String getAccessToken() {
+        try {
+            var tokenResponse = keycloak.tokenManager().getAccessToken();
+            return tokenResponse.getToken();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve access token", e);
+        }
+    }
 }

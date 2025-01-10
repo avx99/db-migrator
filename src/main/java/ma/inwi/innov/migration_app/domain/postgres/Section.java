@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
-@Table(name = "section")
+@Table(schema = "innov", name = "section")
 public class Section extends AuditDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
