@@ -1,6 +1,8 @@
 package ma.inwi.innov.migration_app.jobs;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import ma.inwi.innov.migration_app.annotations.Executable;
 import ma.inwi.innov.migration_app.batch.SequentialExecutor;
 import ma.inwi.innov.migration_app.config.MigrationUtilsProperties;
 import ma.inwi.innov.migration_app.jobs.spec.Job;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class Launcher {
 
     private final MigrationUtilsProperties migrationUtilsProperties;
@@ -34,23 +37,50 @@ public class Launcher {
      * @see Job
      */
     public void jobLauncher(ApplicationContext ctx) {
+        log.info("Starting job launcher");
+
         // Check if migration is enabled via the configuration properties
         if (migrationUtilsProperties.isEnabled()) {
+            log.info("Migration feature is enabled, proceeding with job execution");
+
             // Find executable job classes based on package and versions defined in the configuration
             var jobs = ReflectionUtils.findExecutableClasses("ma.inwi.innov.migration_app.jobs", migrationUtilsProperties.getVersions());
 
-            // If jobs are found, iterate over them and execute each
-            if (jobs != null) {
-                for (var job : jobs) {
+            if (jobs == null || jobs.isEmpty()) {
+                log.warn("No jobs found to execute");
+                return;
+            }
+
+            // Log the number of jobs found
+            log.info("Found {} job(s) to execute", jobs.size());
+
+            // Iterate over the jobs and execute each
+            for (var job : jobs) {
+                try {
+                    log.info("Preparing to execute job: {}", job.getLeft().getSimpleName());
+
                     // Get the Job bean from the application context
-                    var jobBean = (Job) ctx.getBean(job);
+                    var jobBean = (Job) ctx.getBean(job.getLeft());
+
+                    // Log the successful retrieval of the job bean
+                    log.debug("Retrieved job bean for: {}", job.getLeft().getSimpleName());
 
                     // Create a SequentialExecutor for the job and execute with the configured batch size
-                    var executor = new SequentialExecutor(jobBean);
+                    var executor = new SequentialExecutor(jobBean, job.getRight());
+                    log.info("Executing job with batch size: {}", migrationUtilsProperties.getBatchSize());
                     executor.execute(migrationUtilsProperties.getBatchSize());
+
+                    log.info("Job {} executed successfully", job.getLeft().getSimpleName());
+
+                } catch (Exception e) {
+                    log.error("Error executing job {}: {}", job.getLeft().getSimpleName(), e.getMessage(), e);
                 }
             }
+        } else {
+            log.info("Migration feature is disabled, skipping job execution");
         }
+
+        log.info("Job launcher execution completed");
     }
 }
 

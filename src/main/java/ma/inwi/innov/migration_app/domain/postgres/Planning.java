@@ -14,14 +14,17 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
+@Table(schema = "innov", name = "planning")
 public class Planning extends AuditDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private LocalDate date;
-    private LocalTime time;
+    @Column(name = "time_start")
+    private LocalTime timeStart;
     private String activity;
-    private Integer duration;
+    @Column(name = "time_end")
+    private LocalTime timeEnd;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)

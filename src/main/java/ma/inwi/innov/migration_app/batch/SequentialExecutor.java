@@ -17,7 +17,7 @@ import ma.inwi.innov.migration_app.jobs.spec.Job;
  * <p>Usage example:
  * <pre>
  * Job myJob = new MyJobImplementation();
- * Executor executor = new SequentialExecutor(myJob);
+ * Executor executor = new SequentialExecutor(myJob, "v1.10.2");
  * executor.execute(100); // Processes records in batches of 100
  * </pre>
  *
@@ -41,7 +41,8 @@ public class SequentialExecutor implements Executor {
     /**
      * The job to be executed in batches.
      */
-    private final Job job;
+    private final Job<?> job;
+    private final String version;
 
     /**
      * Executes the given job in batches of the specified size.
@@ -55,11 +56,23 @@ public class SequentialExecutor implements Executor {
         var count = job.getSize();
         var steps = count / batchSize;
         var left = count % batchSize;
+
+        log.info("Starting execution of job: {}, Total items: {}, Batch size: {}, Total steps: {}, Remaining items: {}", job.getClass().getSimpleName(), count, batchSize, steps, left);
+
         for (var i = 0; i < steps; i++) {
-            job.migrate(i, batchSize);
+            log.info("Executing batch {} of {}, Items: {}, Version: {}", i + 1, steps, batchSize, version);
+            job.migrate(i, batchSize, version);
+
+            // Log progress
+            log.info("Completed batch {} of {}, Remaining items: {}", i + 1, steps, count - ((i + 1) * batchSize));
+
+            // Handle any remaining items after the last full batch
             if (i == steps - 1 && left != 0) {
-                job.migrate(i + 1, (int) (left));
+                log.info("Executing final batch for remaining items: {}", left);
+                job.migrate(i + 1, (int) left, version);
             }
         }
+        log.info("Execution of job: {} completed. Total items processed: {}", job.getClass().getSimpleName(), count);
     }
+
 }

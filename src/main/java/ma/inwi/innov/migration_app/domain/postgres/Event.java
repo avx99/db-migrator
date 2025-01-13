@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import ma.inwi.innov.migration_app.enumeration.StatusEnum;
+import ma.inwi.innov.migration_app.jobs.spec.Migrable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,11 +21,13 @@ import java.util.List;
 @SuperBuilder
 @AllArgsConstructor
 @Table(schema = "innov", name = "event")
-public class Event extends AuditDetails {
+public class Event extends AuditDetails implements Migrable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
+    //TODO : add them
+    private String version;
     private LocalDate date;
     //TODO : add them
     @Transient
@@ -76,14 +79,14 @@ public class Event extends AuditDetails {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> users;
 
-    @OneToMany(mappedBy = "event", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "event", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private List<Speaker> speakers;
 
     //TODO : add them
     @Transient
-    @OneToMany(mappedBy = "event", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "event", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private List<Category> categories;
 
-    @OneToMany(mappedBy = "event", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "event", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private List<Partner> partners;
 }

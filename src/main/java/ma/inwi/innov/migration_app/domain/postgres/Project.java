@@ -40,6 +40,7 @@ public class Project extends AuditDetails {
     private String maturityStage;
     private Boolean pinned;
     private String title;
+    @Column(name = "image_url")
     private String imageUrl;
 
     @ManyToOne

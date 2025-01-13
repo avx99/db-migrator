@@ -3,6 +3,7 @@ package ma.inwi.innov.migration_app.domain.postgres;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import ma.inwi.innov.migration_app.jobs.spec.Migrable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,12 +15,13 @@ import java.util.List;
 @SuperBuilder
 @AllArgsConstructor
 @Table(schema = "innov", name = "user")
-public class User extends AuditDetails {
+public class User extends AuditDetails implements Migrable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String keycloakId;
+    private String version;
     private LocalDate birthDate;
     private String phoneNumber;
     private String firstName;

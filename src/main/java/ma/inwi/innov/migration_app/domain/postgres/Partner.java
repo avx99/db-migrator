@@ -13,10 +13,12 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @AllArgsConstructor
+@Table(schema = "innov", name = "partner")
 public class Partner extends AuditDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(name = "image_url")
     private String imageUrl;
 
     @ManyToOne

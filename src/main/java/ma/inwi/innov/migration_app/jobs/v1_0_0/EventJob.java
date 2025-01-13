@@ -15,14 +15,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 @Executable(version = "1.0.0")
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class EventJob implements Job {
+public class EventJob implements Job<Event> {
 
     private final EventRepository eventRepository;
     @PersistenceContext(unitName = "mysql")
@@ -31,7 +30,7 @@ public class EventJob implements Job {
     private String staticFilesRoot;
 
     @Transactional(transactionManager = "mysqlTransactionManager", readOnly = true)
-    public void migrate(int page, int size) {
+    public void migrate(int page, int size, String version) {
         var offset = page * size;
         var eventBuilder = Event.builder();
         var sql = String.format("SELECT * FROM events LIMIT %d OFFSET %d", size, offset);
@@ -171,6 +170,7 @@ public class EventJob implements Job {
                 partners.add(partner);
             }
             eventBuilder.partners(partners);
+            eventBuilder.version(version);
             var event = eventBuilder.build();
             fixReferences(event);
             eventRepository.save(event);
@@ -210,9 +210,9 @@ public class EventJob implements Job {
         var planningBuilder = Planning.builder();
         var startTime = DateUtils.convertToLocalTime((String) record[1], null, false);
         var endTime = DateUtils.convertToLocalTime((String) record[2], null, false);
-        var duration = (startTime != null && endTime != null) ? ChronoUnit.MINUTES.between(startTime, endTime) : 0;
-        planningBuilder.time(startTime);
-        planningBuilder.duration((int) duration);
+//        var duration = (startTime != null && endTime != null) ? ChronoUnit.MINUTES.between(startTime, endTime) : 0;
+        planningBuilder.timeStart(startTime);
+        planningBuilder.timeEnd(endTime);
         planningBuilder.activity((String) record[3]);
         planningBuilder.date(DateUtils.convertToLocalDate((String) record[7], false));
         return planningBuilder.build();
@@ -263,6 +263,27 @@ public class EventJob implements Job {
     }
 
     private void fixReferences(Event event) {
-        event.getEventMedias().forEach(eventMedia -> eventMedia.setEvent(event));
+        if (event.getEventMedias() != null) {
+            event.getEventMedias().forEach(eventMedia -> eventMedia.setEvent(event));
+        }
+        if (event.getEventArticles() != null) {
+            event.getEventArticles().forEach(articleEvent -> articleEvent.setEvent(event));
+        }
+        if (event.getPlannings() != null) {
+            event.getPlannings().forEach(planning -> planning.setEvent(event));
+        }
+        if (event.getWinners() != null) {
+            event.getWinners().forEach(eventWinner -> eventWinner.setEvent(event));
+        }
+        if (event.getSpeakers() != null) {
+            event.getSpeakers().forEach(speaker -> speaker.setEvent(event));
+        }
+        if (event.getCategories() != null) {
+            event.getCategories().forEach(category -> category.setEvent(event));
+        }
+        if (event.getPartners() != null) {
+            event.getPartners().forEach(partner -> partner.setEvent(event));
+        }
     }
+
 }

@@ -22,11 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-@Executable(version = "1.0.0")
+@Executable(version = "1.x0.0")
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class UserJob implements Job {
+public class UserJob implements Job<User> {
     private final UserRepository userRepository;
     private final InnovServiceClient innovServiceClient;
     @PersistenceContext(unitName = "mysql")
@@ -37,7 +37,7 @@ public class UserJob implements Job {
 
     @Override
     @Transactional(transactionManager = "mysqlTransactionManager", readOnly = true)
-    public void migrate(int page, int size) {
+    public void migrate(int page, int size, String version) {
         var offset = page * size;
         var sql = String.format("SELECT * FROM users where id  = 284 LIMIT %d OFFSET %d", size, offset);
         var query = mysqlEntityManager.createNativeQuery(sql);

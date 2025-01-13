@@ -1,6 +1,7 @@
 package ma.inwi.innov.migration_app.utils;
 
 import ma.inwi.innov.migration_app.annotations.Executable;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,9 +28,9 @@ public class ReflectionUtils {
      * @return a list of classes that are annotated with {@link Executable} and match
      *         the specified versions, or null if an error occurs
      */
-    public static List<Class<?>> findExecutableClasses(String packageName, List<String> validVersions) {
+    public static List<Pair<Class<?>, String>>findExecutableClasses(String packageName, List<String> validVersions) {
         try {
-            var classes = new ArrayList<Class<?>>();
+            var classes = new ArrayList<Pair<Class<?>, String>>();
             var packagePath = packageName.replace('.', '/');
             var resources = Thread.currentThread().getContextClassLoader().getResources(packagePath);
             while (resources.hasMoreElements()) {
@@ -52,10 +53,10 @@ public class ReflectionUtils {
      *
      * @param packageName   the current package name being scanned
      * @param directory     the directory to scan for classes
-     * @param classes       the list to add matching classes to
+     * @param classes       the list to add matching classes (with their versions)
      * @param validVersions the list of valid versions to match
      */
-    private static void findClassesInDirectory(String packageName, File directory, List<Class<?>> classes, List<String> validVersions) {
+    private static void findClassesInDirectory(String packageName, File directory, List<Pair<Class<?>, String>> classes, List<String> validVersions) {
         try {
             for (var file : Objects.requireNonNull(directory.listFiles())) {
                 if (file.isDirectory()) {
@@ -67,7 +68,7 @@ public class ReflectionUtils {
                         var executable = clazz.getAnnotation(Executable.class);
                         var jobVersion = executable.version();
                         if (validVersions != null && validVersions.contains(jobVersion)) {
-                            classes.add(clazz);
+                            classes.add(Pair.of(clazz, jobVersion));
                         }
                     }
                 }

@@ -19,8 +19,10 @@ public class EventWinner {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String ranking;
+    @Column(name = "company_name")
     private String companyName;
     private String description;
+    @Column(name = "url_image")
     private String urlImage;
 
     @ManyToOne(fetch = FetchType.LAZY)
