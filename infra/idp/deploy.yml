@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      initContainers:
+      - name: install-bcrypt-provider
+        image: curlimages/curl:latest
+        command:
+          - sh
+          - -c
+          - >
+            curl -L https://github.com/leroyguillaume/keycloak-bcrypt/releases/download/v1.6.0/keycloak-bcrypt-1.6.0.jar 
+            -o /tmp/keycloak/providers/keycloak-bcrypt-1.6.0.jar && chmod 644 /tmp/keycloak/providers/keycloak-bcrypt-1.6.0.jar;
+        volumeMounts:
+        - name: keycloak-providers
+          mountPath: /tmp/keycloak/providers
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:21.1.2
+        args: ["start-dev"]
+        env:
+        - name: KEYCLOAK_ADMIN
+          value: admin
+        - name: BCRYPT_ROUNDS
+          value: "4" 
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: admin
+        volumeMounts:
+        - name: keycloak-providers
+          mountPath: /opt/keycloak/providers
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+      volumes:
+      - name: keycloak-providers
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: keycloak
+  type: NodePort

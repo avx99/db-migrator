@@ -172,6 +172,7 @@ public class EventJob implements Job {
             }
             eventBuilder.partners(partners);
             var event = eventBuilder.build();
+            fixReferences(event);
             eventRepository.save(event);
         }
 
@@ -259,5 +260,9 @@ public class EventJob implements Job {
             case "application" -> "application";
             default -> null;
         };
+    }
+
+    private void fixReferences(Event event) {
+        event.getEventMedias().forEach(eventMedia -> eventMedia.setEvent(event));
     }
 }
