@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service class for managing Keycloak users.
@@ -45,19 +46,24 @@ public class KeycloakUserService {
      * @return The ID of the newly created user.
      */
     public String createUser(AccountDto account, Boolean isActive) {
-        log.info("Start Service migrate user to keycloak");
+        try {
+            log.info("Start Service migrate user to keycloak");
 
-        var user = mapToUserRepresentation(account, isActive);
-        var response = keycloak.realm(keycloakProperties.getRealm()).users().create(user);
+            var user = mapToUserRepresentation(account, isActive);
+            var response = keycloak.realm(keycloakProperties.getRealm()).users().create(user);
 
-        if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
-            var errorMessage = String.format("Failed to create user %s: %s", account.email(), response.readEntity(String.class));
-            log.error(errorMessage);
+            if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
+                var errorMessage = String.format("Failed to create user %s: %s", account.email(), response.readEntity(String.class));
+                log.error(errorMessage);
+            }
+
+            var userId = extractUserId(response);
+            log.info("End Service migrate user to keycloak");
+            return userId;
+        } catch (Exception e) {
+            log.error("can not migrate the user {}", account.email());
+            return "xxx-" + UUID.randomUUID().toString();
         }
-
-        var userId = extractUserId(response);
-        log.info("End Service migrate user to keycloak");
-        return userId;
     }
 
     /**

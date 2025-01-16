@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.UUID;
 
 @Executable(version = "1.0.0", order = "1")
 @Component
@@ -50,8 +49,7 @@ public class UserJob implements Job<User> {
         for (var record : results) {
             var userBuilder = User.builder();
             var recordRows = (Object[]) record;
-//            var keycloakId = keycloakUserService.createUser(mapUser(recordRows), recordRows[23] != null && ((String) recordRows[23]).trim().equals("Activé"));
-            var keycloakId = UUID.randomUUID().toString();
+            var keycloakId = keycloakUserService.createUser(mapUser(recordRows), recordRows[23] != null && ((String) recordRows[23]).trim().equals("Activé"));
             mapUser(recordRows, userBuilder, keycloakId);
             userBuilder.version(version);
             userBuilder.role(role);
@@ -60,9 +58,6 @@ public class UserJob implements Job<User> {
         }
     }
 
-    private void manageUsersLinkWithEvents() {
-
-    }
 
     @Override
     public Long getSize() {

@@ -169,6 +169,25 @@ public class EventJob implements Job<Event> {
                 var partner = mapEventPartners(eventPartnersRecordRows);
                 partners.add(partner);
             }
+
+            //users
+            var eventUsersSql = String.format("""
+                    select
+                    	*
+                    from
+                    	event_participant
+                    where
+                    	event_id = %d;
+                    """, (Integer) recordRows[0]);
+            var eventUsersQuery = mysqlEntityManager.createNativeQuery(eventPartnersSql);
+            var eventUsersResults = eventPartnersQuery.getResultList();
+            var users = new ArrayList<User>();
+            for (var eventUsersRecord : eventUsersResults) {
+                var eventUsersRecordRows = (Object[]) eventUsersRecord;
+                var user = mapEventUsers(eventUsersRecordRows);
+                users.add(user);
+            }
+
             eventBuilder.partners(partners);
             eventBuilder.version(version);
             var event = eventBuilder.build();
@@ -260,6 +279,10 @@ public class EventJob implements Job<Event> {
             case "application" -> "application";
             default -> null;
         };
+    }
+
+    private User mapEventUsers(Object[] records) {
+        return User.builder().id((Integer) records[2]).build();
     }
 
     private void fixReferences(Event event) {
