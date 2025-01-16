@@ -42,7 +42,7 @@ public class UserJob implements Job<User> {
     @Transactional(transactionManager = "mysqlTransactionManager", readOnly = true)
     public void migrate(int page, int size, String version) {
         var offset = page * size;
-        var sql = String.format("SELECT * FROM users LIMIT %d OFFSET %d", size, offset);
+        var sql = String.format("SELECT * FROM users where social_user_id is null LIMIT %d OFFSET %d", size, offset);
         var query = mysqlEntityManager.createNativeQuery(sql);
         var results = query.getResultList();
         var role = roleRepository.findByCode("STARTUP").orElse(new Role());

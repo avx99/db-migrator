@@ -69,7 +69,7 @@ public class SequentialExecutor implements Executor {
             // Handle any remaining items after the last full batch
             if (i == steps - 1 && left != 0) {
                 log.info("Executing final batch for remaining items: {}", left);
-                job.migrate(i + 1, (int) left, version);
+                job.migrate(i + 1, batchSize, version);
             }
         }
         log.info("Execution of job: {} completed. Total items processed: {}", job.getClass().getSimpleName(), count);

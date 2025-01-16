@@ -93,11 +93,11 @@ public class KeycloakUserService {
         credential.setTemporary(false);
         credential.setSecretData(account.password());
         credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(account.password());
+        credential.setValue(account.password() + "xxxxxxxxxxxxx");
 
         var userRepresentation = new UserRepresentation();
-        userRepresentation.setFirstName(account.firstName());
-        userRepresentation.setLastName(account.lastName());
+        userRepresentation.setFirstName(account.firstName() + "xxxxxxxxxxxxx");
+        userRepresentation.setLastName(account.lastName() + "xxxxxxxxxxxxx");
         userRepresentation.setEmail(account.email());
         userRepresentation.setUsername(account.email());
         userRepresentation.setEnabled(isActive);
