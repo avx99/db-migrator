@@ -99,7 +99,7 @@ public class KeycloakUserService {
         userRepresentation.setFirstName(account.firstName());
         userRepresentation.setLastName(account.lastName());
         userRepresentation.setEmail(account.email());
-        userRepresentation.setUsername(extractUsername(account.email()));
+        userRepresentation.setUsername(account.email());
         userRepresentation.setEnabled(isActive);
         userRepresentation.setCredentials(List.of(credential));
         return userRepresentation;

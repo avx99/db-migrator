@@ -8,6 +8,7 @@ import ma.inwi.innov.migration_app.annotations.Executable;
 import ma.inwi.innov.migration_app.domain.postgres.*;
 import ma.inwi.innov.migration_app.jobs.spec.Job;
 import ma.inwi.innov.migration_app.repository.postgres.EventRepository;
+import ma.inwi.innov.migration_app.repository.postgres.UserRepository;
 import ma.inwi.innov.migration_app.utils.ConversionUtils;
 import ma.inwi.innov.migration_app.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 public class EventJob implements Job<Event> {
 
     private final EventRepository eventRepository;
+    private final UserRepository userRepository;
     @PersistenceContext(unitName = "mysql")
     private EntityManager mysqlEntityManager;
     @Value("${migration.utils.static-files-root}")
@@ -169,26 +171,30 @@ public class EventJob implements Job<Event> {
                 var partner = mapEventPartners(eventPartnersRecordRows);
                 partners.add(partner);
             }
+            eventBuilder.partners(partners);
 
             //users
             var eventUsersSql = String.format("""
                     select
-                    	*
+                    	ep.*,
+                    	u.*
                     from
-                    	event_participant
+                    	event_participant ep
+                    inner join users u on
+                    u.id = ep.user_id
                     where
                     	event_id = %d;
                     """, (Integer) recordRows[0]);
-            var eventUsersQuery = mysqlEntityManager.createNativeQuery(eventPartnersSql);
-            var eventUsersResults = eventPartnersQuery.getResultList();
-            var users = new ArrayList<User>();
+            var eventUsersQuery = mysqlEntityManager.createNativeQuery(eventUsersSql);
+            var eventUsersResults = eventUsersQuery.getResultList();
+            var users = new ArrayList<EventUser>();
             for (var eventUsersRecord : eventUsersResults) {
                 var eventUsersRecordRows = (Object[]) eventUsersRecord;
                 var user = mapEventUsers(eventUsersRecordRows);
                 users.add(user);
             }
+            eventBuilder.eventUsers(users);
 
-            eventBuilder.partners(partners);
             eventBuilder.version(version);
             var event = eventBuilder.build();
             fixReferences(event);
@@ -281,8 +287,12 @@ public class EventJob implements Job<Event> {
         };
     }
 
-    private User mapEventUsers(Object[] records) {
-        return User.builder().id((Integer) records[2]).build();
+    private EventUser mapEventUsers(Object[] records) {
+        var user = userRepository.findFirstByEmail((String) records[8]).orElse(null);
+        return EventUser
+                .builder()
+                .user(user)
+                .build();
     }
 
     private void fixReferences(Event event) {
@@ -306,6 +316,9 @@ public class EventJob implements Job<Event> {
         }
         if (event.getPartners() != null) {
             event.getPartners().forEach(partner -> partner.setEvent(event));
+        }
+        if (event.getEventUsers() != null) {
+            event.getEventUsers().forEach(eventUser -> eventUser.setEvent(event));
         }
     }
 
