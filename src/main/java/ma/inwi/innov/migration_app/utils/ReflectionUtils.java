@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,9 +27,9 @@ public class ReflectionUtils {
      * @param packageName   the package to search for classes
      * @param validVersions the list of valid versions to match
      * @return a list of classes that are annotated with {@link Executable} and match
-     *         the specified versions, or null if an error occurs
+     * the specified versions, or null if an error occurs
      */
-    public static List<Pair<Class<?>, String>>findExecutableClasses(String packageName, List<String> validVersions) {
+    public static List<Pair<Class<?>, String>> findExecutableClasses(String packageName, List<String> validVersions) {
         try {
             var classes = new ArrayList<Pair<Class<?>, String>>();
             var packagePath = packageName.replace('.', '/');
@@ -40,6 +41,10 @@ public class ReflectionUtils {
                     findClassesInDirectory(packageName, directory, classes, validVersions);
                 }
             }
+            classes.sort(Comparator.comparingInt(clazz -> {
+                var annotation = clazz.getLeft().getAnnotation(Executable.class);
+                return Integer.parseInt(annotation.order());
+            }));
             return classes;
         } catch (Exception e) {
             return null;
@@ -67,7 +72,8 @@ public class ReflectionUtils {
                     if (clazz.isAnnotationPresent(Executable.class)) {
                         var executable = clazz.getAnnotation(Executable.class);
                         var jobVersion = executable.version();
-                        if (validVersions != null && validVersions.contains(jobVersion)) {
+                        var jobEnabled = executable.enable();
+                        if (jobEnabled && validVersions != null && validVersions.contains(jobVersion)) {
                             classes.add(Pair.of(clazz, jobVersion));
                         }
                     }

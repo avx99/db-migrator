@@ -82,9 +82,7 @@ public class KeycloakConfig {
                 .realm(keycloakProperties.getRealm())
                 .clientId(keycloakProperties.getResource())
                 .clientSecret(keycloakProperties.getCredentials().getSecret())
-                .password(keycloakProperties.getCredentials().getPassword())
-                .username(keycloakProperties.getCredentials().getUsername())
-                .grantType(OAuth2Constants.PASSWORD)
+                .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
                 .build();
     }
 }

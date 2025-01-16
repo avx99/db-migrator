@@ -20,11 +20,16 @@ public class User extends AuditDetails implements Migrable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(name = "keycloak_id")
     private String keycloakId;
     private String version;
+    @Column(name = "birth_date")
     private LocalDate birthDate;
+    @Column(name = "phone_number")
     private String phoneNumber;
+    @Column(name = "first_name")
     private String firstName;
+    @Column(name = "last_name")
     private String lastName;
     private String city;
     private String job;
@@ -32,20 +37,23 @@ public class User extends AuditDetails implements Migrable {
     private String username;
     private String image;
     private String profession;
+    @Column(name = "inwi_phone")
     private String inwiPhone;
     private boolean active;
     private String company;
+    @Column(name = "education_level")
     private String educationLevel;
     private String skills;
+    @Column(name = "years_of_experience")
     private Integer yearsOfExperience;
 
     @ManyToOne
     private Role role;
 
-
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Project> projects;
-
+//
+//    @OneToMany(fetch = FetchType.LAZY)
+//    private List<Project> projects;
+//
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "events_users",

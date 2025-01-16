@@ -14,13 +14,9 @@ public class KeycloakProperties {
     private String authServerUrl;
     private String realm;
     private String resource;
-    private String username;
-    private String password;
     private Credentials credentials;
     @Data
     public static class Credentials {
         private String secret;
-        private String username;
-        private String password;
     }
 }

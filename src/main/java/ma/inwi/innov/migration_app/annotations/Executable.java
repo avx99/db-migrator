@@ -34,4 +34,18 @@ public @interface Executable {
      * @return the version as a {@code String}
      */
     String version();
+
+    /**
+     * Decide if this job is going to be executed or not.
+     *
+     * @return the version as a {@code boolean}
+     */
+    boolean enable() default true;
+
+    /**
+     * Order of job's execution
+     *
+     * @return the version as a {@code boolean}
+     */
+    String order() default "0";
 }

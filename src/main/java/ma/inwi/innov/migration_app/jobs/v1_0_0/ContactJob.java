@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 
-@Executable(version = "1.0.0")
+@Executable(version = "1.0.0", order = "3")
 @Component
 @Slf4j
 @RequiredArgsConstructor

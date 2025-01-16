@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
-@Executable(version = "1.0.0")
+@Executable(version = "1.0.0", order = "2")
 @Component
 @Slf4j
 @RequiredArgsConstructor

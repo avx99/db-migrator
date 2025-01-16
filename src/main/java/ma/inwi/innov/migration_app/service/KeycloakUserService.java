@@ -87,9 +87,7 @@ public class KeycloakUserService {
         credential.setTemporary(false);
         credential.setSecretData(account.password());
         credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setCredentialData("{\"algorithm\":\"bcrypt\",\"hashIterations\":10}");
-//        credential.setHashedSaltedValue(account.password());
-//        credential.setHashIterations(4);
+        credential.setValue(account.password());
 
         var userRepresentation = new UserRepresentation();
         userRepresentation.setFirstName(account.firstName());
