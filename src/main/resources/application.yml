@@ -50,6 +50,7 @@ migration:
     static-files-root: ${MIGRATION_STATIC_FILES_ROOT:/v1/static/data/}
     batch-size: 5
     enabled: true
+    rollback-strategy: ON_ERROR
     versions:
       - "1.0.0"
 

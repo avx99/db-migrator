@@ -39,4 +39,15 @@ public interface Job<T extends Migrable> {
      * @return The total number of items to be migrated.
      */
     Long getSize();
+
+    /**
+     * Rollback changes of a specific version
+     * <p>
+     * This method is responsible for performing rollback of a version in case there are some error or to revert changes.
+     * </p>
+     *
+     * @param version the version of the migration (used to tag migrated records in db)
+     */
+    void rollback(String version);
+
 }

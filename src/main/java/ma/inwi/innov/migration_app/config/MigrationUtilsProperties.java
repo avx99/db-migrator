@@ -14,5 +14,6 @@ public class MigrationUtilsProperties {
     private String staticFilesRoot;
     private int batchSize;
     private boolean enabled;
+    private RollbackStrategy rollbackStrategy;
     private List<String> versions;
 }

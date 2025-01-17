@@ -37,6 +37,7 @@ public class EventJob implements Job<Event> {
         var eventBuilder = Event.builder();
         var sql = String.format("SELECT * FROM events LIMIT %d OFFSET %d", size, offset);
         var query = mysqlEntityManager.createNativeQuery(sql);
+        String x = null;
         var results = query.getResultList();
         for (var record : results) {
             var recordRows = (Object[]) record;
@@ -76,7 +77,7 @@ public class EventJob implements Job<Event> {
                 plannings.add(mapEventsPlanning(eventPlanningRecordRows));
             }
             eventBuilder.plannings(plannings);
-
+            x.trim();
 
             //categories
             var eventCategoriesSql = String.format("""
@@ -210,6 +211,16 @@ public class EventJob implements Job<Event> {
         return (results != null && !results.isEmpty()) ? (Long) results.getFirst() : 0L;
     }
 
+    @Transactional(transactionManager = "postgresTransactionManager")
+    public void rollback(String version) {
+        log.info("Start rollback events , version = {}", version);
+        eventRepository.deleteEventMediaByUserVersion();
+        eventRepository.deletePartnerByUserVersion();
+        eventRepository.deletePlanningByUserVersion();
+        eventRepository.deleteSpeakerByUserVersion();
+        eventRepository.deleteEvents();
+    }
+
     private void mapEventsDetails(Object[] record, Event.EventBuilder<?, ?> eventBuilder) {
         eventBuilder.migrated(true);
         eventBuilder.eventTitle((String) record[1]);
@@ -229,7 +240,6 @@ public class EventJob implements Job<Event> {
         //TODO : make sure compan_on(16) is useless
         //TODO : make sure live_label(17) is useless
     }
-
 
     private Planning mapEventsPlanning(Object[] record) {
         var planningBuilder = Planning.builder();
@@ -254,7 +264,6 @@ public class EventJob implements Job<Event> {
         eventBuilder.city((String) record[1]);
     }
 
-
     private EventMedia mapEventMedias(Object[] record) {
         var eventMediaBuilder = EventMedia.builder();
         eventMediaBuilder.type(mapEventType((String) record[1]));
@@ -275,7 +284,6 @@ public class EventJob implements Job<Event> {
         eventSpeakerBuilder.imageUrl(staticFilesRoot + record[4]);
         return eventSpeakerBuilder.build();
     }
-
 
     private String mapEventType(String source) {
         return switch (source) {

@@ -43,6 +43,19 @@ public class ContactJob implements Job<Contact> {
         }
     }
 
+    public Long getSize() {
+        var sql = "SELECT count(*) FROM contacts";
+        var query = mysqlEntityManager.createNativeQuery(sql);
+        var results = query.getResultList();
+        return (results != null && !results.isEmpty()) ? (Long) results.getFirst() : 0L;
+    }
+
+    @Transactional(transactionManager = "postgresTransactionManager")
+    public void rollback(String version) {
+        log.info("Start rollback contacts , version = {}", version);
+        contactRepository.deleteContactsByVersion();
+    }
+
     private void mapContacts(Object[] record, Contact.ContactBuilder<?, ?> contactBuilder) {
         contactBuilder.firstName((String) record[1]);
         contactBuilder.lastName((String) record[2]);
@@ -67,12 +80,5 @@ public class ContactJob implements Job<Contact> {
             case 7 -> SenderType.UNIVERSITY;
             default -> null;
         };
-    }
-
-    public Long getSize() {
-        var sql = "SELECT count(*) FROM contacts";
-        var query = mysqlEntityManager.createNativeQuery(sql);
-        var results = query.getResultList();
-        return (results != null && !results.isEmpty()) ? (Long) results.getFirst() : 0L;
     }
 }

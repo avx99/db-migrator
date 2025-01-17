@@ -67,6 +67,23 @@ public class KeycloakUserService {
     }
 
     /**
+     * Delete user in Keycloak.
+     *
+     * @param keycloakId The user id to delete.
+     */
+    public void deleteUser(String keycloakId) {
+        try {
+            log.info("Start Service delete user from keycloak with id {}", keycloakId);
+            var response = keycloak.realm(keycloakProperties.getRealm()).users().delete(keycloakId);
+            if (response.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
+                log.error("Failed to delete user with id {}", keycloakId);
+            }
+        } catch (Exception e) {
+            log.error("cannot delete user from keycloak with id {}", keycloakId);
+        }
+    }
+
+    /**
      * Extracts the user ID from the location URL in the Keycloak response.
      *
      * @param response The response from the Keycloak server.

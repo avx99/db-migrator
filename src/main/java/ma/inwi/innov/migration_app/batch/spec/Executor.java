@@ -21,10 +21,14 @@ package ma.inwi.innov.migration_app.batch.spec;
  *     public void execute(Integer batchSize) {
  *         // Logic to process records in batches of the specified size
  *     }
+ *
+ *     &#64;Override
+ *     public void rollback() {
+ *         // Logic to process records rollback for a specific version
+ *     }
  * }
  * </pre>
  */
-@FunctionalInterface
 public interface Executor {
 
     /**
@@ -33,4 +37,10 @@ public interface Executor {
      * @param batchSize the number of records or tasks to process in each batch
      */
     void execute(Integer batchSize);
+
+    /**
+     * Executes rollback for specified version.
+     *
+     */
+    void rollback();
 }

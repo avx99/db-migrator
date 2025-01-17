@@ -11,6 +11,7 @@ import ma.inwi.innov.migration_app.domain.postgres.User;
 import ma.inwi.innov.migration_app.dto.AccountDto;
 import ma.inwi.innov.migration_app.enumeration.documents.DocumentType;
 import ma.inwi.innov.migration_app.jobs.spec.Job;
+import ma.inwi.innov.migration_app.repository.postgres.EventRepository;
 import ma.inwi.innov.migration_app.repository.postgres.RoleRepository;
 import ma.inwi.innov.migration_app.repository.postgres.UserRepository;
 import ma.inwi.innov.migration_app.service.KeycloakUserService;
@@ -30,6 +31,7 @@ import java.sql.Timestamp;
 @RequiredArgsConstructor
 public class UserJob implements Job<User> {
     private final UserRepository userRepository;
+    private final EventRepository eventRepository;
     private final RoleRepository roleRepository;
     private final InnovServiceClient innovServiceClient;
     @PersistenceContext(unitName = "mysql")
@@ -65,6 +67,17 @@ public class UserJob implements Job<User> {
         var query = mysqlEntityManager.createNativeQuery(sql);
         var results = query.getResultList();
         return (results != null && !results.isEmpty()) ? (Long) results.get(0) : 0L;
+    }
+
+    @Transactional(transactionManager = "postgresTransactionManager")
+    public void rollback(String version) {
+        log.info("Start rollback users , version = {}", version);
+        var ids = userRepository.findAllKeycloakIdsByVersion(version);
+      //  ids.forEach(keycloakUserService::deleteUser);
+
+        eventRepository.deleteEventsUsersByUserVersion();
+
+        userRepository.deleteUserByVersion();
     }
 
     private void mapUser(Object[] record, User.UserBuilder<?, ?> userBuilder, String keycloakId) {

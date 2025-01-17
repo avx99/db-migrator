@@ -2,9 +2,9 @@ package ma.inwi.innov.migration_app.jobs;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ma.inwi.innov.migration_app.annotations.Executable;
 import ma.inwi.innov.migration_app.batch.SequentialExecutor;
 import ma.inwi.innov.migration_app.config.MigrationUtilsProperties;
+import ma.inwi.innov.migration_app.config.RollbackStrategy;
 import ma.inwi.innov.migration_app.jobs.spec.Job;
 import ma.inwi.innov.migration_app.utils.ReflectionUtils;
 import org.springframework.context.ApplicationContext;
@@ -39,6 +39,10 @@ public class Launcher {
     public void jobLauncher(ApplicationContext ctx) {
         log.info("Starting job launcher");
 
+        if (RollbackStrategy.NONE.equals(migrationUtilsProperties.getRollbackStrategy())) {
+            log.warn("No rollback strategy is applied");
+        }
+
         // Check if migration is enabled via the configuration properties
         if (migrationUtilsProperties.isEnabled()) {
             log.info("Migration feature is enabled, proceeding with job execution");
@@ -68,7 +72,30 @@ public class Launcher {
                     // Create a SequentialExecutor for the job and execute with the configured batch size
                     var executor = new SequentialExecutor(jobBean, job.getRight());
                     log.info("Executing job with batch size: {}", migrationUtilsProperties.getBatchSize());
-                    executor.execute(migrationUtilsProperties.getBatchSize());
+
+                    if (migrationUtilsProperties.getRollbackStrategy() == null || RollbackStrategy.NONE.equals(migrationUtilsProperties.getRollbackStrategy())) {
+                        log.info("No rollback strategy is applied, performing migration directly");
+                        executor.execute(migrationUtilsProperties.getBatchSize());
+
+                    } else if (RollbackStrategy.FORCE.equals(migrationUtilsProperties.getRollbackStrategy())) {
+                        log.info("No migration will be performed only rollback method will be launched");
+                        executor.rollback();
+
+                    } else if (RollbackStrategy.ON_ERROR.equals(migrationUtilsProperties.getRollbackStrategy())) {
+                        log.info("Performing migration with rollback in case of error while executing");
+                        try {
+                            executor.execute(migrationUtilsProperties.getBatchSize());
+                        } catch (Exception e) {
+                            log.error("Getting issue while migrating, performing rollback ...");
+                            jobs.forEach(currentJob -> {
+                                var currentJobBean = (Job) ctx.getBean(currentJob.getLeft());
+                                var currentExecutor = new SequentialExecutor(currentJobBean, currentJob.getRight());
+                                currentExecutor.rollback();
+                            });
+                            log.warn("rollback all jobs");
+                            return;
+                        }
+                    }
 
                     log.info("Job {} executed successfully", job.getLeft().getSimpleName());
 

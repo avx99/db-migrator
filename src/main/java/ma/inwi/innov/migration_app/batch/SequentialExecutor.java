@@ -75,4 +75,13 @@ public class SequentialExecutor implements Executor {
         log.info("Execution of job: {} completed. Total items processed: {}", job.getClass().getSimpleName(), count);
     }
 
+    /**
+     * Executes the given job rollback method.
+     */
+    @Override
+    public void rollback() {
+        log.info("Starting rollback of job: {}", job.getClass().getSimpleName());
+        job.rollback(version);
+    }
+
 }
