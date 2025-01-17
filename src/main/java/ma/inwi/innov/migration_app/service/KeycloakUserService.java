@@ -134,8 +134,8 @@ public class KeycloakUserService {
             throw new RuntimeException("Failed to set hashedSaltedValue via reflection.", e);
         }
         var userRepresentation = new UserRepresentation();
-        userRepresentation.setFirstName(account.firstName() + "xxxxxx");
-        userRepresentation.setLastName(account.lastName() + "xxxxx");
+        userRepresentation.setFirstName(account.firstName());
+        userRepresentation.setLastName(account.lastName());
         userRepresentation.setEmail(account.email());
         userRepresentation.setUsername(account.email());
         userRepresentation.setEnabled(isActive);
