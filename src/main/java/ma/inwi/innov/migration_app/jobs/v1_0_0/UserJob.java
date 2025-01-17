@@ -92,7 +92,7 @@ public class UserJob implements Job<User> {
         userBuilder.username(record[2] != null ? ((String) record[2]).split("@")[0] : null);
         if (record[8] instanceof String imageName) {
             try {
-                var imageId = innovServiceClient.uploadDocument(FilesUtils.getFile(imageName), DocumentType.INTERNAL, "user");
+                var imageId = innovServiceClient.uploadDocument("Bearer " + keycloakUserService.getAccessToken(), FilesUtils.getFile(imageName), DocumentType.INTERNAL, "user");
                 userBuilder.image(imageId);
             } catch (Exception e) {
                 log.error("could not upload image {}", imageName);

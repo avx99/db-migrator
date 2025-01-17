@@ -1,5 +1,6 @@
 package ma.inwi.innov.migration_app.client.config;
 
+import feign.Logger;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.RequiredArgsConstructor;
@@ -49,12 +50,16 @@ public class FeignClientRequestInterceptor {
      *
      * @return the {@link RequestInterceptor} bean to be used by Feign clients
      */
-    @Bean
     RequestInterceptor requestInterceptor() {
         return (RequestTemplate template) -> {
             // Add the Authorization header with Bearer token
             template.headers().put("Authorization", List.of("Bearer " + keycloakUserService.getAccessToken()));
         };
+    }
+
+    @Bean
+    Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
     }
 }
 

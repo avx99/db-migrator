@@ -1,6 +1,6 @@
 package ma.inwi.innov.migration_app.client;
 
-import feign.Headers;
+import org.springframework.web.bind.annotation.RequestHeader;
 import ma.inwi.innov.migration_app.client.config.FeignClientRequestInterceptor;
 import ma.inwi.innov.migration_app.enumeration.documents.DocumentType;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -62,8 +62,8 @@ public interface InnovServiceClient {
      * @return A response indicating the result of the document upload.
      */
     @PostMapping(value = "/v1/documents/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Headers("Content-Type: multipart/form-data")
     String uploadDocument(
+            @RequestHeader("Authorization") String token,
             @RequestPart("file") MultipartFile file,
             @RequestParam DocumentType documentType,
             @RequestParam String entity);
