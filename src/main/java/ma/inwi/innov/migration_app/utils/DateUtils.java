@@ -84,7 +84,9 @@ public class DateUtils {
      */
     public static LocalDate convertToLocalDate(String date, Boolean returnNowDate) {
         try {
-            return LocalDate.parse(date);
+            var datePart = date.split(" ")[0];
+            var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return LocalDate.parse(datePart, formatter);
         } catch (Exception e) {
             return Boolean.TRUE.equals(returnNowDate) ? LocalDate.now() : null;
         }

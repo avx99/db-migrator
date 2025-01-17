@@ -37,7 +37,6 @@ public class EventJob implements Job<Event> {
         var eventBuilder = Event.builder();
         var sql = String.format("SELECT * FROM events LIMIT %d OFFSET %d", size, offset);
         var query = mysqlEntityManager.createNativeQuery(sql);
-        String x = null;
         var results = query.getResultList();
         for (var record : results) {
             var recordRows = (Object[]) record;
@@ -77,7 +76,6 @@ public class EventJob implements Job<Event> {
                 plannings.add(mapEventsPlanning(eventPlanningRecordRows));
             }
             eventBuilder.plannings(plannings);
-            x.trim();
 
             //categories
             var eventCategoriesSql = String.format("""
@@ -228,12 +226,15 @@ public class EventJob implements Job<Event> {
         eventBuilder.pictureUrl(staticFilesRoot + (String) record[3]);
         eventBuilder.createdAt(DateUtils.convertToLocalDateTime((Timestamp) record[4], true));
         eventBuilder.updatedAt(DateUtils.convertToLocalDateTime((Timestamp) record[5], false));
+        //TODO: map the name when its known
+//        eventBuilder.name((String) record[6]);
         //TODO : make sure its eq of active:
         eventBuilder.publish(ConversionUtils.convertToBoolean(((Boolean) record[7]).toString()));
         //TODO : make sure cta_inscription(9) is useless
         //TODO : use url_inscription_externe(10) in medias
         //TODO : make sure without_city(11) is useless
         eventBuilder.startInscriptionDate(DateUtils.convertToLocalDateTime((Timestamp) record[12], false));
+        eventBuilder.date(DateUtils.convertToLocalDate((Timestamp) record[12], false));
         eventBuilder.endInscriptionDate(DateUtils.convertToLocalDateTime((Timestamp) record[13], false));
         eventBuilder.isLive(ConversionUtils.convertToBoolean(((Boolean) record[14]).toString()));
         //TODO : make sure places_live(15) is useless

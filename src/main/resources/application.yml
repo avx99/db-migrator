@@ -9,9 +9,9 @@ spring:
       enabled: ALWAYS
   datasource:
     postgres:
-      url: jdbc:postgresql://192.168.49.2:30037/migration
-      username: ${INNOV_BACKEND_DB_USERNAME:migration}
-      password: ${INNOV_BACKEND_DB_PASSWORD:migration}
+      url: jdbc:postgresql://192.168.1.230:5432/innov?currentSchema=innov
+      username: ${INNOV_BACKEND_DB_USERNAME:postgres}
+      password: ${INNOV_BACKEND_DB_PASSWORD:postgres}
       driver-class-name: org.postgresql.Driver
       hikari:
         maximum-pool-size: 20
@@ -50,7 +50,7 @@ migration:
     static-files-root: ${MIGRATION_STATIC_FILES_ROOT:/v1/static/data/}
     batch-size: 5
     enabled: true
-    rollback-strategy: ON_ERROR
+    rollback-strategy: FORCE
     versions:
       - "1.0.0"
 
@@ -58,15 +58,15 @@ migration:
 feign:
   clients:
     innov:
-      cms: ${MIGRATION_INNOV_CMS_URL:http://localhost:1337}
-      service: ${MIGRATION_INNOV_CMS_URL:http://localhost:8090}
+      cms: ${MIGRATION_INNOV_CMS_URL:http://kong-innov.xelops.lan/facade}
+      service: ${MIGRATION_INNOV_CMS_URL:http://kong-innov.xelops.lan/innov}
 
 
 keycloak:
-  realm: innov
-  auth-server-url: ${MIGRATION_IDP_HOST:http://192.168.49.2:30859}
-  resource: ${MIGRATION_CLIENT_ID_KECK:innov}
+  realm: innov-external
+  auth-server-url: ${MIGRATION_IDP_HOST:http://keycloak-innov.xelops.lan}
+  resource: ${MIGRATION_CLIENT_ID_KECK:innov-service-api}
   credentials:
-    secret: ${MIGRATION_CLIENT_KECK_SECRET:V0Orm0CBgvNLqdY066vxjwlf8NgSmPgx}
+    secret: ${MIGRATION_CLIENT_KECK_SECRET:IPHJSLYXzEGjFxaZSnNpC8YI4VChSqOm}
   use-resource-role-mappings: true
   service-account-enabled: true
