@@ -12,6 +12,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,6 +53,9 @@ public class KeycloakUserService {
             var user = mapToUserRepresentation(account, isActive);
             var response = keycloak.realm(keycloakProperties.getRealm()).users().create(user);
 
+            var errorMessage2 = String.format("current user %s %s: %s", account.email(), account.firstName(), response.readEntity(String.class));
+            log.warn(errorMessage2);
+
             if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
                 var errorMessage = String.format("Failed to create user %s: %s", account.email(), response.readEntity(String.class));
                 log.error(errorMessage);
@@ -61,8 +65,8 @@ public class KeycloakUserService {
             log.info("End Service migrate user to keycloak");
             return userId;
         } catch (Exception e) {
-            log.error("can not migrate the user {}", account.email());
-            return "xxx-" + UUID.randomUUID().toString();
+            log.error("can not migrate the user {}. Error: {}", account.email(), e.getMessage(), e);
+            return "xxx-" + UUID.randomUUID();
         }
     }
 
@@ -108,13 +112,30 @@ public class KeycloakUserService {
     private UserRepresentation mapToUserRepresentation(AccountDto account, Boolean isActive) {
         var credential = new CredentialRepresentation();
         credential.setTemporary(false);
-        credential.setSecretData(account.password());
         credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(account.password() + "xxxxxxxxxxxxx");
+        try {
+            Field algorithm = credential.getClass().getDeclaredField("algorithm");
+            algorithm.setAccessible(true);
+            algorithm.set(credential, "bcrypt");
 
+            Field hashIterations = credential.getClass().getDeclaredField("hashIterations");
+            hashIterations.setAccessible(true);
+            hashIterations.set(credential, 12);
+
+            Field salt = credential.getClass().getDeclaredField("salt");
+            salt.setAccessible(true);
+            salt.set(credential, "");
+
+            Field hashedSaltedValue = credential.getClass().getDeclaredField("hashedSaltedValue");
+            hashedSaltedValue.setAccessible(true);
+            hashedSaltedValue.set(credential, account.password());
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to set hashedSaltedValue via reflection.", e);
+        }
         var userRepresentation = new UserRepresentation();
-        userRepresentation.setFirstName(account.firstName() + "xxxxxxxxxxxxx");
-        userRepresentation.setLastName(account.lastName() + "xxxxxxxxxxxxx");
+        userRepresentation.setFirstName(account.firstName() + "xxxxxx");
+        userRepresentation.setLastName(account.lastName() + "xxxxx");
         userRepresentation.setEmail(account.email());
         userRepresentation.setUsername(account.email());
         userRepresentation.setEnabled(isActive);
