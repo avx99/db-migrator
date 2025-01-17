@@ -29,6 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class KeycloakUserService {
 
+    public static final String UNKOWN_ID_PREFIX = "xxx-";
     private final KeycloakProperties keycloakProperties;
 
     @Lazy
@@ -66,7 +67,7 @@ public class KeycloakUserService {
             return userId;
         } catch (Exception e) {
             log.error("can not migrate the user {}. Error: {}", account.email(), e.getMessage(), e);
-            return "xxx-" + UUID.randomUUID();
+            return UNKOWN_ID_PREFIX + UUID.randomUUID();
         }
     }
 
@@ -76,14 +77,17 @@ public class KeycloakUserService {
      * @param keycloakId The user id to delete.
      */
     public void deleteUser(String keycloakId) {
-        try {
-            log.info("Start Service delete user from keycloak with id {}", keycloakId);
-            var response = keycloak.realm(keycloakProperties.getRealm()).users().delete(keycloakId);
-            if (response.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
-                log.error("Failed to delete user with id {}", keycloakId);
+        if(keycloakId != null && !keycloakId.startsWith(UNKOWN_ID_PREFIX)) {
+            try {
+                log.info("Start Service delete user from keycloak with id {}", keycloakId);
+                try (var response = keycloak.realm(keycloakProperties.getRealm()).users().delete(keycloakId)) {
+                    if (response.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
+                        log.error("Failed to delete user with id {}", keycloakId);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("cannot delete user from keycloak with id {}", keycloakId);
             }
-        } catch (Exception e) {
-            log.error("cannot delete user from keycloak with id {}", keycloakId);
         }
     }
 

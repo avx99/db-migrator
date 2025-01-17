@@ -73,7 +73,8 @@ public class UserJob implements Job<User> {
     public void rollback(String version) {
         log.info("Start rollback users , version = {}", version);
         var ids = userRepository.findAllKeycloakIdsByVersion(version);
-//        ids.forEach(keycloakUserService::deleteUser);
+
+        ids.forEach(keycloakUserService::deleteUser);
 
         eventRepository.deleteEventsUsersByUserVersion();
 
