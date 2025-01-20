@@ -26,7 +26,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 
 @Executable(version = "1.0.0", order = "1")
-@Component
+@Component("UserJobV1.0.0")
 @Slf4j
 @RequiredArgsConstructor
 public class UserJob implements Job<User> {

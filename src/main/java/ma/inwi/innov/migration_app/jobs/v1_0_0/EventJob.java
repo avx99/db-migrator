@@ -19,7 +19,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 @Executable(version = "1.0.0", order = "2")
-@Component
+@Component("EventJobV1.0.0")
 @Slf4j
 @RequiredArgsConstructor
 public class EventJob implements Job<Event> {

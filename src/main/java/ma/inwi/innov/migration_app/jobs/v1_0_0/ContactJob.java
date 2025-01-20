@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 
 @Executable(version = "1.0.0", order = "3")
-@Component
+@Component("ContactJobV1.0.0")
 @Slf4j
 @RequiredArgsConstructor
 public class ContactJob implements Job<Contact> {

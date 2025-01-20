@@ -41,10 +41,14 @@ public class ReflectionUtils {
                     findClassesInDirectory(packageName, directory, classes, validVersions);
                 }
             }
-            classes.sort(Comparator.comparingInt(clazz -> {
+            classes.sort(Comparator.comparing((Pair<Class<?>, ?> clazz) -> {
                 var annotation = clazz.getLeft().getAnnotation(Executable.class);
-                return Integer.parseInt(annotation.order());
+                return annotation.version();  // Compare by version first
+            }).thenComparingInt(clazz -> {
+                var annotation = clazz.getLeft().getAnnotation(Executable.class);
+                return Integer.parseInt(annotation.order());  // Then compare by order
             }));
+
             return classes;
         } catch (Exception e) {
             return null;
