@@ -3,7 +3,7 @@ package ma.inwi.innov.migration_app.jobs.v2_0_0;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.inwi.innov.migration_app.annotations.Executable;
-import ma.inwi.innov.migration_app.domain.postgres.Event;
+import ma.inwi.innov.migration_app.domain.Event;
 import ma.inwi.innov.migration_app.jobs.spec.Job;
 import org.springframework.stereotype.Component;
 

@@ -45,7 +45,14 @@ public @interface Executable {
     /**
      * Order of job's execution
      *
-     * @return the version as a {@code boolean}
+     * @return the version as a {@code String}
      */
     String order() default "0";
+
+    /**
+     * Description of the job
+     *
+     * @return the description as a {@code String}
+     */
+    String description() default "";
 }

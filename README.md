@@ -1,9 +1,9 @@
 
-# Migration App
+# db-migrator
 
 ## Overview
 
-The Migration App is a Spring Boot application designed to facilitate the migration of data from a MySQL database to a PostgreSQL database. The application leverages Spring Batch for batch processing, Feign for service communication, and integrates with Keycloak for authentication.
+The db-migrator App is a Spring Boot application designed to facilitate the migration of data from a MySQL database to a PostgreSQL database. The application leverages Spring Batch for batch processing, Feign for service communication, and integrates with Keycloak for authentication.
 
 This app uses a Gradle build system, and it is configurable using the `application.yaml` file, which contains details about the databases, Keycloak integration, and other system parameters.
 

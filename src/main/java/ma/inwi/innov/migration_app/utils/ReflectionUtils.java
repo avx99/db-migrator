@@ -26,10 +26,11 @@ public class ReflectionUtils {
      *
      * @param packageName   the package to search for classes
      * @param validVersions the list of valid versions to match
+     * @param onlyEnabled   if true, its going to fetch only enabled job.
      * @return a list of classes that are annotated with {@link Executable} and match
      * the specified versions, or null if an error occurs
      */
-    public static List<Pair<Class<?>, String>> findExecutableClasses(String packageName, List<String> validVersions) {
+    public static List<Pair<Class<?>, String>> findExecutableClasses(String packageName, List<String> validVersions, Boolean onlyEnabled) {
         try {
             var classes = new ArrayList<Pair<Class<?>, String>>();
             var packagePath = packageName.replace('.', '/');
@@ -38,7 +39,7 @@ public class ReflectionUtils {
                 var resource = resources.nextElement();
                 var directory = new File(resource.getFile());
                 if (directory.exists()) {
-                    findClassesInDirectory(packageName, directory, classes, validVersions);
+                    findClassesInDirectory(packageName, directory, classes, validVersions, onlyEnabled);
                 }
             }
             classes.sort(Comparator.comparing((Pair<Class<?>, ?> clazz) -> {
@@ -64,12 +65,13 @@ public class ReflectionUtils {
      * @param directory     the directory to scan for classes
      * @param classes       the list to add matching classes (with their versions)
      * @param validVersions the list of valid versions to match
+     * @param onlyEnabled   if true, its going to fetch only enabled job.
      */
-    private static void findClassesInDirectory(String packageName, File directory, List<Pair<Class<?>, String>> classes, List<String> validVersions) {
+    private static void findClassesInDirectory(String packageName, File directory, List<Pair<Class<?>, String>> classes, List<String> validVersions, Boolean onlyEnabled) {
         try {
             for (var file : Objects.requireNonNull(directory.listFiles())) {
                 if (file.isDirectory()) {
-                    findClassesInDirectory(packageName + "." + file.getName(), file, classes, validVersions);
+                    findClassesInDirectory(packageName + "." + file.getName(), file, classes, validVersions, onlyEnabled);
                 } else if (file.getName().endsWith(".class")) {
                     var className = packageName + '.' + file.getName().substring(0, file.getName().length() - 6);
                     var clazz = Class.forName(className);
@@ -77,7 +79,7 @@ public class ReflectionUtils {
                         var executable = clazz.getAnnotation(Executable.class);
                         var jobVersion = executable.version();
                         var jobEnabled = executable.enable();
-                        if (jobEnabled && validVersions != null && validVersions.contains(jobVersion)) {
+                        if ((!onlyEnabled || jobEnabled) && validVersions != null && validVersions.contains(jobVersion)) {
                             classes.add(Pair.of(clazz, jobVersion));
                         }
                     }

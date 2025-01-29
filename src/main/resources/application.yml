@@ -8,22 +8,15 @@ spring:
     ansi:
       enabled: ALWAYS
   datasource:
-    postgres:
-      url: jdbc:postgresql://192.168.1.230:5432/innov?currentSchema=innov
-      username: ${INNOV_BACKEND_DB_USERNAME:postgres}
-      password: ${INNOV_BACKEND_DB_PASSWORD:postgres}
-      driver-class-name: org.postgresql.Driver
-      hikari:
-        maximum-pool-size: 20
-    mysql:
-      url: ${OLD_INNOV_BACKEND_DB_URL:jdbc:mysql://192.168.49.2:30036/migration?allowPublicKeyRetrieval=true&useSSL=false&zeroDateTimeBehavior=convertToNull}
-      username: ${OLD_INNOV_BACKEND_DB_USERNAME:root}
-      password: ${OLD_INNOV_BACKEND_DB_PASSWORD:root}
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      hikari:
-        maximum-pool-size: 20
+    url: jdbc:postgresql://172.27.210.242:30037/migration
+    username: migration
+    password: migration
+    driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 ---
 
 management:
@@ -38,12 +31,6 @@ logging:
       springframework:
         web: DEBUG
         boot.context.properties: DEBUG
-      hibernate:
-        SQL: DEBUG
-        type:
-          descriptor:
-            sql:
-              BasicBinder: TRACE
 
 migration:
   utils:
@@ -55,20 +42,3 @@ migration:
       - "1.0.0"
       - "1.1.0"
       - "2.0.0"
-
----
-feign:
-  clients:
-    innov:
-      cms: ${MIGRATION_INNOV_CMS_URL:http://kong-innov.xelops.lan/facade}
-      service: ${MIGRATION_INNOV_CMS_URL:http://kong-innov.xelops.lan/innov}
-
-
-keycloak:
-  realm: innov-external
-  auth-server-url: ${MIGRATION_IDP_HOST:http://keycloak-innov.xelops.lan}
-  resource: ${MIGRATION_CLIENT_ID_KECK:innov-service-api}
-  credentials:
-    secret: ${MIGRATION_CLIENT_KECK_SECRET:IPHJSLYXzEGjFxaZSnNpC8YI4VChSqOm}
-  use-resource-role-mappings: true
-  service-account-enabled: true
