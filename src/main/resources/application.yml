@@ -33,12 +33,13 @@ logging:
         boot.context.properties: DEBUG
 
 migration:
-  utils:
-    static-files-root: ${MIGRATION_STATIC_FILES_ROOT:/v1/static/data/}
-    batch-size: 5
-    enabled: true
-    rollback-strategy: NONE
-    versions:
-      - "1.0.0"
-      - "1.1.0"
-      - "2.0.0"
+  batch-size: 5
+  enabled: true
+  mode: NON_INTERACTIVE
+  rollback-strategy: NONE
+  jobs-package: com.avx.migration.jobs
+  executor: SEQUENTIAL
+  versions:
+    - "1.0.0"
+    - "1.1.0"
+    - "2.0.0"

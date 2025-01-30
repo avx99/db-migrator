@@ -81,7 +81,6 @@ This section configures the migration utility, such as the location for static f
 ```yaml
 migration:
   utils:
-    static-files-root: ${MIGRATION_STATIC_FILES_ROOT:/v1/static/data/}
     batch-size: 5
     enabled: true
     versions:
