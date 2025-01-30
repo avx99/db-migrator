@@ -1,0 +1,82 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Build & Test
+      run: ./gradlew build --no-daemon
+
+  create-tag:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Get version from gradle.properties
+      id: get_version
+      run: |
+        VERSION=$(./gradlew -q printVersion)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Create a new tag for the version
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git tag "v${{ env.VERSION }}"
+        git push origin "v${{ env.VERSION }}"
+
+  release:
+    runs-on: ubuntu-latest
+    needs: create-tag
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Generate JAR File
+      run: ./gradlew build --no-daemon
+
+    - name: Upload JAR to GitHub Releases
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/libs/*.jar
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
