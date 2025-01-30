@@ -60,3 +60,7 @@ tasks.register("printVersion") {
 		println(project.version)
 	}
 }
+
+tasks.bootJar {
+	enabled = false
+}
