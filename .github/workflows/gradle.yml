@@ -5,9 +5,6 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  # Trigger the release job only when a tag is created
-  create:
-    tags: [ 'v*.*.*' ]  # Match versions like v1.0.0
 
 jobs:
   build:
@@ -31,9 +28,32 @@ jobs:
     - name: Build & Test
       run: ./gradlew build --no-daemon
 
-  release:
+  create-tag:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Get version from gradle.properties
+      id: get_version
+      run: |
+        VERSION=$(./gradlew -q printVersion)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Create a new tag for the version
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git tag "v${{ env.VERSION }}"
+        git push origin "v${{ env.VERSION }}"
+
+  release:
+    runs-on: ubuntu-latest
+    needs: create-tag
     permissions:
       contents: write
       id-token: write
