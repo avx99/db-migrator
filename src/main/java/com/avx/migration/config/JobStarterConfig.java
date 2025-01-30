@@ -1,6 +1,5 @@
 package com.avx.migration.config;
 
-import com.avx.migration.MigrationAppApplication;
 import com.avx.migration.jobs.Launcher;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
