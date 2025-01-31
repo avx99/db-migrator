@@ -40,11 +40,21 @@ This section configures the migration utility, such as the location for static f
 
 ```yaml
 migration:
-  utils:
-    batch-size: 5
-    enabled: true
-    versions:
-      - "1.0.0"
+  datasource:
+    url: jdbc:postgresql://your-database-host:port/dbname
+    username: your-username
+    password: your-password
+    driver-class-name: <Driver>
+  batch-size: 5
+  enabled: true
+  mode: NON_INTERACTIVE
+  rollback-strategy: FORCE
+  jobs-package: com.example.demo.app.jobs
+  executor: SEQUENTIAL
+  versions:
+    - "1.0.0"
+    - "1.1.0"
+    - "2.0.0"
 ```
 
 ```
