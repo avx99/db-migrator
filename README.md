@@ -9,7 +9,7 @@ This app uses a Gradle build system, and it is configurable using the `applicati
 
 ## Prerequisites
 
-- JDK 17+
+- JDK 21
 - Gradle
 - SQL database to store history of operations
 
@@ -47,12 +47,6 @@ migration:
       - "1.0.0"
 ```
 
-## Running the Application
-
-To run the application, use the following command:
-
-```bash
-./gradlew bootRun
 ```
 ## Conclusion
 
